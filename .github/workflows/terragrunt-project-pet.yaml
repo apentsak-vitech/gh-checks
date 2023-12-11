@@ -25,12 +25,12 @@ jobs:
         uses: apentsak-vitech/gh-checks/github/publish-checks@main
         with:
           name: Terragrunt HCL Check
-          conclusion: false
+          conclusion: success
           description-file: terraform1.txt
 
       - name: Terragrunt HCL Check
         uses: apentsak-vitech/gh-checks/github/publish-checks@main
         with:
           name: Terragrunt HCL Check
-          conclusion: false
+          conclusion: success
           description-file: terraform2.txt
