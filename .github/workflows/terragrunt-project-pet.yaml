@@ -1,0 +1,33 @@
+name: Terragrunt PET
+
+on:
+  pull_request:
+    paths:
+      - iac-tf/**
+
+permissions:
+  pull-requests: write
+  contents: write
+  id-token: write
+
+jobs:
+
+  define-targets:
+    name: Test Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Terragrunt HCL Check
+        uses: github/publish-check@main
+        with:
+          name: Terragrunt HCL Check
+          conclusion: false
+          description-file: terraform1.txt
+
+      - name: Terragrunt HCL Check
+        uses: github/publish-check@main
+        with:
+          name: Terragrunt HCL Check
+          conclusion: false
+          description-file: terraform2.txt
