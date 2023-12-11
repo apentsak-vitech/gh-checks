@@ -11,26 +11,125 @@ permissions:
   security-events: write
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.NEW_GHUB_TOKEN }}
 
 jobs:
 
   define-targets:
-    name: Test Checks
+#    name: Test Checks
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - aws_account: cardiaws
+            namespace: prod
+            target: cardiaws/prod/s3
+          - aws_account: cardiaws
+            namespace: uat
+            target: cardiaws/uat/s3
+#          - aws_account: dev-cardi-io
+#            namespace: dev
+#            target: dev-cardi-io/dev/s3
+#          - aws_account: dev-cardi-io
+#            namespace: qa
+#            target: dev-cardi-io/qa/s3
+#
+#          - aws_account: cardiaws
+#            namespace: prod
+#            target: cardiaws/prod/subnet
+#          - aws_account: cardiaws
+#            namespace: uat
+#            target: cardiaws/uat/subnet
+#          - aws_account: dev-cardi-io
+#            namespace: dev
+#            target: dev-cardi-io/dev/subnet
+#          - aws_account: dev-cardi-io
+#            namespace: qa
+#            target: dev-cardi-io/qa/subnet
+#
+#          - aws_account: cardiaws
+#            namespace: prod
+#            target: cardiaws/prod/vpc
+#          - aws_account: cardiaws
+#            namespace: uat
+#            target: cardiaws/uat/vpc
+#          - aws_account: dev-cardi-io
+#            namespace: dev
+#            target: dev-cardi-io/dev/vpc
+#          - aws_account: dev-cardi-io
+#            namespace: qa
+#            target: dev-cardi-io/qa/vpc
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Terragrunt HCL Log
-        uses: apentsak-vitech/gh-checks/github/publish-checks@main
-        with:
-          name: Terragrunt HCL Log
-          conclusion: success
-          description-file: terraform1.md
+      - name: Terraform Plan
+        run: |
+          cat terraform_test.md
 
-      - name: Terragrunt HCL Log
-        uses: apentsak-vitech/gh-checks/github/publish-checks@main
+
+      - name: Get Current Job Log URL
+        id: jobs
+        env:
+          JOB_NAME: "${{ matrix.target }}"
+          STEP_NAME: "Terraform Plan"
+        run: |
+          GITHUB_API="/repos/${INPUT_REPOSITORY:-${GITHUB_REPOSITORY}}/actions/runs/${INPUT_RUN_ID:-${GITHUB_RUN_ID}}/jobs"
+          echo $GITHUB_API_URL
+          echo curl --get -Ss "${GITHUB_API_URL}${GITHUB_API}?per_page=${INPUT_PER_PAGE:-30}"
+          JOBINFO="$(curl --get -Ss "${GITHUB_API_URL}${GITHUB_API}?per_page=${INPUT_PER_PAGE:-30}")"
+          echo $JOBINFO
+          echo "${JOBINFO}" | grep "Resource not accessible by integration" &&  exit 1
+          eval "$(echo ${JOBINFO} | jq -r --arg job_name "${JOB_NAME}" \
+            '.jobs | map(select(.name | contains($job_name))) | .[0] | @sh "job_id=\(.id) html_url=\(.html_url)"')"
+          echo ${job_id} | grep "null" > /dev/null && echo "parse error, job_id is ${job_id}. job name might be wrong. See https://github.com/Tiryoh/gha-jobid-action" && exit 1
+          
+          if [[ -n "${STEP_NAME}" ]]; then
+            eval "$(echo ${JOBINFO} | jq -r --arg job_name "${JOB_NAME}" --arg step_name "${STEP_NAME}" \
+              '.jobs | map(select(.name | contains($job_name))) | .[0] | .steps | map(select(.name == $step_name))| .[0] | @sh "step_number=\(.number)"')"
+            echo "step_number=${step_number}" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "job_id=${job_id}" >> $GITHUB_OUTPUT
+          echo "html_url=${html_url}" >> $GITHUB_OUTPUT
+          
+
+      - name: Get IDs
+        run: |
+          echo RunId: ${{ github.run_id }}
+          echo JobId: ${{ steps.jobs.outputs.job_id }}
+          echo StepNum: ${{ steps.jobs.outputs.step_number }}
+
+      - name: Terraform Split Log
+        id: logfile
+        run: |
+          file="terraform_test.md"
+          
+          sed -i '1i ``` terraform' $file
+          echo '```' >> $file
+          file_size=`stat -c %s $file`
+
+          echo "File Size: $file_size"
+          if (( $file_size >= 65535 )); then
+            echo "File is greater then 65535. Splitting ..."
+            split -C 63k $file ${file}_split_
+            file="${file}_split_aa"
+            lines_count=`wc -l < $file`
+            
+            echo "" >> $file
+            echo "..." >> $file
+            echo '```' >> $file
+            echo "" >> $file
+            echo "[See full log](${{ steps.jobs.outputs.html_url }}#step:${{ steps.jobs.outputs.step_number }}:$lines_count)" >> $file
+          fi
+          echo "file=$file" >> $GITHUB_OUTPUT
+          
+
+      - uses: apentsak-vitech/gh-checks/github/publish-checks@main
         with:
-          name: Terragrunt HCL Log
+          name: TerraLog (${{ matrix.target }})
           conclusion: success
-          description-file: terraform2.txt
+          description-file: ${{ steps.logfile.outputs.file }}
+
+
