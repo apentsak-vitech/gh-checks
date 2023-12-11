@@ -3,7 +3,7 @@ name: Terragrunt PET
 on:
   pull_request:
     paths:
-      - iac-tf/**
+      - **/*
 
 permissions:
   pull-requests: write
