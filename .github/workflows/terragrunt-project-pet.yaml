@@ -21,16 +21,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Terragrunt HCL Check
+      - name: Terragrunt HCL Log
         uses: apentsak-vitech/gh-checks/github/publish-checks@main
         with:
-          name: Terragrunt HCL Check
+          name: Terragrunt HCL Log
           conclusion: success
-          description-file: terraform1.txt
+          description-file: terraform1.md
 
-      - name: Terragrunt HCL Check
+      - name: Terragrunt HCL Log
         uses: apentsak-vitech/gh-checks/github/publish-checks@main
         with:
-          name: Terragrunt HCL Check
+          name: Terragrunt HCL Log
           conclusion: success
           description-file: terraform2.txt
