@@ -58,6 +58,11 @@ Terraform will perform the following actions:
         - enabled    = false -> null
         - mfa_delete = false -> null
       }
+
+    - versioning {
+        - enabled    = false -> null
+        - mfa_delete = false -> null
+      }
   }
 
 # aws_s3_object.this must be replaced
