@@ -16,14 +16,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Terragrunt HCL Check
-        uses: github/publish-check@main
+        uses: apentsak-vitech/gh-checks/github/publish-check@main
         with:
           name: Terragrunt HCL Check
           conclusion: false
           description-file: terraform1.txt
 
       - name: Terragrunt HCL Check
-        uses: github/publish-check@main
+        uses: apentsak-vitech/gh-checks/github/publish-check@main
         with:
           name: Terragrunt HCL Check
           conclusion: false
