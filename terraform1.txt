@@ -44,6 +44,14 @@ Terraform will perform the following actions:
         - type        = "CanonicalUser" -> null
       }
 
+    - grant {
+        - id          = "80730b374aa1bb2deb9cc2a53aab494b20b2deacd106cd5e5e4fe7cbf56a1d85" -> null
+        - permissions = [
+            - "FULL_CONTROL",
+          ] -> null
+        - type        = "CanonicalUser" -> null
+      }
+
     - server_side_encryption_configuration {
         - rule {
             - bucket_key_enabled = false -> null
