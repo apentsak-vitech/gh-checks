@@ -1,0 +1,48 @@
+name: Checks Action
+description: |
+
+inputs:
+  name:
+    description: Check name
+    required: true
+  conclusion:
+    description: Check conclusion
+    required: true
+  description-file:
+    description: Path to file with detailed check description
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/github-script@v6
+      if: always()
+      with:
+        script: |
+          const fs = require('fs');
+          const timestamp = new Date().toISOString();
+          const summary = '${{ inputs.conclusion }}' === 'success'
+            ? 'No violations found'
+            : 'Please check the report below for more details';
+          const description = fs.readFileSync('${{ inputs.description-file }}', {encoding:'utf8', flag:'r'});
+
+          await github.rest.checks.create({
+            name: '${{ inputs.name }}',
+            
+            owner: context.payload.repository.owner.login,
+            repo: context.payload.repository.name,
+            
+            head_sha: context.payload.pull_request ? context.payload.pull_request.head.sha : context.sha,
+            
+            status: 'completed',
+            started_at: timestamp,
+            completed_at: timestamp,
+            
+            conclusion: '${{ inputs.conclusion }}',
+            
+            output: {
+              title: '${{ inputs.name }}',
+              summary: summary,
+              text: description,
+            }
+          });
