@@ -26,9 +26,10 @@ Terraform will perform the following actions:
     + website_endpoint            = (known after apply)
   }
 
+
 # aws_s3_object.this will be created
 + resource "aws_s3_object" "this" {
-    + acl                    = (known after apply)
+    + acl                    = (known after apply)pushpu
     + bucket                 = (known after apply)
     + bucket_key_enabled     = (known after apply)
     + checksum_crc32         = (known after apply)
