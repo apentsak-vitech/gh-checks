@@ -112,6 +112,7 @@ jobs:
 
           echo "File Size: $file_size"
           if (( $file_size >= 65535 )); then
+            sed -i '1i This is not full log. [See full log](${{ steps.jobs.outputs.html_url }}#step:${{ steps.jobs.outputs.step_number }}:$lines_count)' $file
             echo "File is greater then 65535. Splitting ..."
             split -C 63k $file ${file}_split_
             file="${file}_split_aa"
