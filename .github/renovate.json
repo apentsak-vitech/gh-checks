@@ -5,7 +5,7 @@
   "prConcurrentLimit": 5,
   "packageRules": [
     {
-      "matchPackagePatterns": [".*/gradle/docker-buildpacks"],
+      "matchPackagePatterns": ["gradle/docker-buildpacks"],
       "description": "Limit AWS SDK upgrades to once a week",
       "allowedVersions": "/v[0-9]+\\.[0-9]+\\.[0-9]+-docker-buildpacks/"
     }
