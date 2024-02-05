@@ -18,6 +18,11 @@
       "matchPackagePatterns": [".*gradle/docker-file.*"],
       "description": "Limit AWS SDK upgrades to once a week",
       "allowedVersions": "/.*-docker-file/"
+    },
+    {
+      "matchPackagePatterns": [".*gradle/docker-plugin.*"],
+      "description": "Limit AWS SDK upgrades to once a week",
+      "allowedVersions": "/.*-docker-plugin/"
     }
   ]
 }

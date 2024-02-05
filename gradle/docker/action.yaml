@@ -72,7 +72,7 @@ runs:
     - name: Run `docker` plugin
       id: docker-plugin
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'docker' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-plugin@v0.0.1
+      uses: apentsak-vitech/gh-checks/gradle/docker-plugin@v0.0.1-docker-plugin
       with:
         build-root-directory: ${{ inputs.build-root-directory }}
         NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
