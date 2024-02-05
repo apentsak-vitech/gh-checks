@@ -13,6 +13,11 @@
       "matchPackagePatterns": [".*/docker/build_v2.*"],
       "description": "Limit AWS SDK upgrades to once a week",
       "allowedVersions": "/.*-docker-build_v2/"
+    },
+    {
+      "matchPackagePatterns": [".*/docker/docker-file.*"],
+      "description": "Limit AWS SDK upgrades to once a week",
+      "allowedVersions": "/.*-docker-file/"
     }
   ]
 }

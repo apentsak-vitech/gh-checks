@@ -83,7 +83,7 @@ runs:
     - name: Run docker build
       id: docker-build
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'docker-file' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-file@v0.0.1
+      uses: apentsak-vitech/gh-checks/gradle/docker-file@v0.0.1-docker-file
       with:
         imageSuffix: ${{ inputs.imageSuffix }}
         registry-base-url: ${{ inputs.registry-base-url }}
