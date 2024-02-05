@@ -1,0 +1,56 @@
+name: 'Docker Build'
+description: 'Build provided dockerfiles'
+inputs:
+
+  devx-config:
+    description: Images descriptor
+    default: .devx.yaml
+  image-tag:
+    description: Docker image version
+    required: true
+  imageSuffix:
+    description: Docker Image Suffix
+    required: true
+  registry-base-url:
+    description: Docker registry base URL
+    required: true
+
+  NEXUS_USERNAME:
+    description: Nexus username
+    required: true
+  NEXUS_PASSWORD:
+    description: Nexus password
+    required: true
+  AWS_ACCESS_KEY_ID:
+    description: AWS Access key
+    required: false
+  AWS_SECRET_ACCESS_KEY:
+    description: AWS secret key
+    required: false
+
+outputs:
+  images:
+    description: comma-separated list of images
+    value: ${{ steps.images-build.outputs.images }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Gradle Build
+      uses: apentsak-vitech/gh-checks/gradle/build@v0.0.1
+      with:
+        build-cmd: --no-daemon --continue build -x check
+        build-root-directory: ${{ inputs.build-root-directory }}
+        NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+
+    - id: images-build
+      name: Find and build Docker images
+      uses: apentsak-vitech/gh-checks/docker/build_v2@v0.0.1
+      with:
+        devx-config: ${{ inputs.devx-config }}
+        image-tag: ${{ inputs.image-tag }}
+        registry-base-url: ${{ inputs.registry-base-url }}
+        imageSuffix: ${{ inputs.imageSuffix }}

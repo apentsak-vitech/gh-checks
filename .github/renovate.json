@@ -1,0 +1,14 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "enabledManagers": ["github-actions"],
+  "automerge": false,
+  "schedule": ["every 2 mins"],
+  "prConcurrentLimit": 5,
+  "packageRules": [
+    {
+      "matchPackagePatterns": [".*/gradle/docker-buildpacks"],
+      "description": "Limit AWS SDK upgrades to once a week",
+      "allowedVersions": "/v[0-9]+\\.[0-9]+\\.[0-9]+-docker-buildpacks/"
+    }
+  ]
+}

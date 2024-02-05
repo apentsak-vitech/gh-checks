@@ -1,0 +1,53 @@
+name: Gradle Build
+description: |
+
+inputs:
+  build-cmd:
+    description: gradle arguments to be executed
+    default: '--no-daemon --continue build'
+  generate-job-summary:
+    description: publish test report
+    default: 'false'
+  publish-test-results:
+    description: publish test report
+    default: 'false'
+  build-root-directory:
+    description: build root directory
+    default: '.'
+
+  NEXUS_USERNAME:
+    description: Nexus username
+    required: true
+  NEXUS_PASSWORD:
+    description: Nexus password
+    required: true
+  AWS_ACCESS_KEY_ID:
+    description: AWS Access key
+    required: false
+  AWS_SECRET_ACCESS_KEY:
+    description: AWS secret key
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Gradle Build
+      uses: gradle/gradle-build-action@v2.11.0
+      env:
+        ORG_GRADLE_PROJECT_nexusUsername: ${{ inputs.NEXUS_USERNAME }}
+        ORG_GRADLE_PROJECT_nexusPassword: ${{ inputs.NEXUS_PASSWORD }}
+        ORG_GRADLE_PROJECT_dockerS3AccessKey: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        ORG_GRADLE_PROJECT_dockerS3SecretKey: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+      with:
+        gradle-version: wrapper
+        arguments: ${{ inputs.build-cmd }}
+        generate-job-summary: ${{ inputs.generate-job-summary }}
+        build-root-directory: ${{ inputs.build-root-directory }}
+
+    - name: Publish JUnit Report
+      if: ${{ inputs.publish-test-results == 'true' && (success() || failure()) }}
+      uses: mikepenz/action-junit-report@v3
+      with:
+        include_passed: false
+        detailed_summary: true
+        report_paths: '**/build/test-results/test/TEST-*.xml'

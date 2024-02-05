@@ -1,0 +1,120 @@
+name: Build Docker With Buildpacks
+description: |
+
+inputs:
+  root-directory:
+    description: Root directory to build docker container from
+    required: false
+    default: '.'
+  java-version:
+    description: java version to use
+    default: '17'
+
+  devx-config:
+    description: Images descriptor
+    default: .devx.yaml
+  imageSuffix:
+    description: Docker Image Suffix
+    required: true
+  registry-base-url:
+    description: Docker registry base URL
+    required: true
+  image-tag:
+    description: docker tag
+    required: true
+  NEXUS_USERNAME:
+    description: Nexus username
+    required: true
+  NEXUS_PASSWORD:
+    description: Nexus password
+    required: true
+
+outputs:
+  images:
+    description: comma-separated list of images
+    value: ${{ steps.build-images.outputs.images }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: ⚙️Setup Buildpacks
+      uses: buildpacks/github-actions/setup-pack@v5.4.0
+
+    - id: vars
+      uses: apentsak-vitech/gh-checks/utils/vars@v0.0.1
+      with:
+        devx-config: ${{ inputs.devx-config }}
+
+    - name: ⇣ Get Buildpack configs
+      shell: bash
+      id: config
+      run: |
+        eval `yq eval '.image-builder.images' -p yaml -o json < ${{ inputs.devx-config }} | jq -r --arg job_name "${{ inputs.imageSuffix }}" 'map(select(.imageSuffix | contains($job_name))) | .[0]| @sh "imageSuffix=\(.imageSuffix) module=\(.module) build_args=\(."build-args") builder=\(.builder)"'`
+
+        echo "imageSuffix=${imageSuffix}" >> $GITHUB_OUTPUT
+        echo "module=${module}" >> $GITHUB_OUTPUT
+        echo "build_args=${build_args}" >> $GITHUB_OUTPUT
+        echo "builder=${builder}" >> $GITHUB_OUTPUT
+        echo $GITHUB_OUTPUT
+
+    - name: 📦 Build app with pack CLI
+      id: build-images
+      shell: bash
+      env:
+        ROOT_DIRECTORY: ${{ inputs.root-directory }}
+        REGISTRY_BASE_URL: ${{ inputs.registry-base-url }}
+        ORG_GRADLE_PROJECT_nexusUsername: ${{ inputs.NEXUS_USERNAME }}
+        ORG_GRADLE_PROJECT_nexusPassword: ${{ inputs.NEXUS_PASSWORD }}
+        REPO_NAME: ${{ github.event.repository.name }}
+        JAVA_VERSION: ${{ inputs.java-version }}
+        TAG: ${{ inputs.image-tag }}
+      run: |
+        set -x
+
+        result=()
+        docker run -d -p 5000:5000 --restart=always -e REGISTRY_STORAGE_DELETE_ENABLED=true -v /tmp/docker-registry:/var/lib/registry --name registry registry:2 && npx wait-on tcp:5000
+
+        imageSuffix="${{ steps.config.outputs.imageSuffix }}"
+        if [[ "$imageSuffix" != "" ]]; then
+            imageSuffix="/$imageSuffix"
+          else
+            imageSuffix=""
+        fi
+
+        export IMAGE="$REGISTRY_BASE_URL/$REPO_NAME$imageSuffix:$TAG"
+        export IMAGE_CACHE="$REGISTRY_BASE_URL/$REPO_NAME$imageSuffix:cache"
+        export IMAGE_LOCAL_REGISTRY="localhost:5000/$REPO_NAME$imageSuffix:$TAG"
+        
+        echo "::group::📦 Building $IMAGE"
+        builder="${{ steps.config.outputs.builder }}"
+        if [[ "$builder" != "null" ]]; then
+            builder="$builder"
+          else
+            builder="${{ env.IMAGE_BUILDER_BUILDPACKS_BUILDER }}"
+        fi
+
+        build_args="${{ steps.config.outputs.build_args }}"
+        if [[ "$build_args" != "null" ]]; then
+            build_args="$build_args"
+          else
+            build_args=""
+        fi
+
+        export module=${{ steps.config.outputs.module }}
+        pack build "$IMAGE_LOCAL_REGISTRY" \
+          --builder $builder $build_args \
+          --env BP_JVM_VERSION=$JAVA_VERSION \
+          --env ORG_GRADLE_PROJECT_nexusUsername \
+          --env ORG_GRADLE_PROJECT_nexusPassword \
+          --env BP_GRADLE_BUILT_MODULE=$module \
+          --volume $HOME/.m2:/home/cnb/.m2:rw \
+          --path $ROOT_DIRECTORY \
+          --publish \
+          --network host \
+          --cache-image $IMAGE_CACHE
+
+        docker pull $IMAGE_LOCAL_REGISTRY
+        docker tag $IMAGE_LOCAL_REGISTRY $IMAGE
+        result+=("$IMAGE")
+        echo "::endgroup::"
+        echo "images=$(IFS=,; echo "${result[*]}")" >> $GITHUB_OUTPUT

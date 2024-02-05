@@ -1,0 +1,36 @@
+name: Build Docker With JIB
+description: |
+
+inputs:
+  build-root-directory:
+    description: Root directory of the gradle build.
+    required: false
+    default: '.'
+  NEXUS_USERNAME:
+    description: Nexus username
+    required: true
+  NEXUS_PASSWORD:
+    description: Nexus password
+    required: true
+
+outputs:
+  images:
+    description: comma-separated list of images
+    value: ${{ steps.collect-images.outputs.images }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run `docker` plugin
+      uses: apentsak-vitech/gh-checks/gradle/build@v0.0.1
+      with:
+        build-cmd: -Djib.console=plain --no-daemon jibDockerBuild
+        build-root-directory: ${{ inputs.build-root-directory }}
+        NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
+
+    - name: Collect images
+      id: collect-images
+      uses: apentsak-vitech/gh-checks/docker/find-images@v0.0.1
+      with:
+        keyword: apentsak
