@@ -1,30 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "enabledManagers": ["github-actions"],
-  "automerge": false,
-  "prConcurrentLimit": 5,
-  "packageRules": [
-    {
-      "matchPackagePatterns": [".*gradle/docker-buildpacks.*"],
-      "description": "Limit AWS SDK upgrades to once a week",
-      "allowedVersions": "/.*-docker-buildpacks/"
-    },
-    {
-      "matchPackagePatterns": [".*/docker/build_v2.*"],
-      "description": "Limit AWS SDK upgrades to once a week",
-      "allowedVersions": "/.*-docker-build_v2/"
-    },
-    {
-      "matchPackagePatterns": [".*gradle/docker-file.*"],
-      "description": "Limit AWS SDK upgrades to once a week",
-      "allowedVersions": "/.*-docker-file/"
-    },
-    {
-      "matchPackagePatterns": [".*gradle/docker-plugin.*"],
-      "description": "Limit AWS SDK upgrades to once a week",
-      "allowedVersions": "/.*-docker-plugin/"
-    }
-  ]
+  "extends": ["local>apentsak-vitech/renovate-config"]
 }
 
 
