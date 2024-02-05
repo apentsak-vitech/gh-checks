@@ -15,7 +15,7 @@
       "allowedVersions": "/.*-docker-build_v2/"
     },
     {
-      "matchPackagePatterns": [".*/docker/docker-file.*"],
+      "matchPackagePatterns": [".*gradle/docker-file.*"],
       "description": "Limit AWS SDK upgrades to once a week",
       "allowedVersions": "/.*-docker-file/"
     }
