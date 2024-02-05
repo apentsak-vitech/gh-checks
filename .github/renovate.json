@@ -8,6 +8,11 @@
       "matchPackagePatterns": [".*gradle/docker-buildpacks.*"],
       "description": "Limit AWS SDK upgrades to once a week",
       "allowedVersions": "/.*-docker-buildpacks/"
+    },
+    {
+      "matchPackagePatterns": [".*/docker/build_v2*"],
+      "description": "Limit AWS SDK upgrades to once a week",
+      "allowedVersions": "/.*-docker-build_v2/"
     }
   ]
 }
