@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>apentsak-vitech/renovate-config"]
+  "extends": ["github>apentsak-vitech/renovate-config"]
 }
 
 
