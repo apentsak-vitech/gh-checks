@@ -45,12 +45,12 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - uses: apentsak-vitech/gh-checks/docker/tag@v0.0.1
+    - uses: apentsak-vitech/gh-checks/docker/tag@v1.1.1
       id: image-tag
       with:
         image-tag: ${{ inputs.image-tag }}
 
-    - uses: apentsak-vitech/gh-checks/utils/vars@v0.0.1
+    - uses: apentsak-vitech/gh-checks/utils/vars@v1.1.1
       id: vars
       with:
         devx-config: ${{ inputs.devx-config }}
@@ -72,7 +72,7 @@ runs:
     - name: Run `docker` plugin
       id: docker-plugin
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'docker' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-plugin@v0.0.1-docker-plugin
+      uses: apentsak-vitech/gh-checks/gradle/docker-plugin@v1.1.2-docker-plugin
       with:
         build-root-directory: ${{ inputs.build-root-directory }}
         NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
@@ -97,7 +97,7 @@ runs:
     - name: Run JIB plugin
       id: docker-jib
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'jib' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-jib@v0.0.1
+      uses: apentsak-vitech/gh-checks/gradle/docker-jib@v1.1.1
       with:
         build-root-directory: ${{ inputs.build-root-directory }}
         NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
