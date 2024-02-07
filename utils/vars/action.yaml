@@ -1,0 +1,58 @@
+name: Pull variables from DevX Config
+description: ""
+
+inputs:
+  devx-config:
+    description: String to escape
+    default: .devx.yaml
+    required: false
+
+outputs:
+  image_builder_enabled:
+    description: Building images is enabled
+    value: ${{ steps.vars.outputs.image_builder_enabled }}
+  conventional_commits_enabled:
+    description: Validate commit messages for conventional commits
+    value: ${{ steps.vars.outputs.checks_conventional_commits_enabled }}
+  csa_enabled:
+    description: Code Scanning Alerts enabled
+    value: ${{ steps.vars.outputs.checks_csa_enabled }}
+  image_builder:
+    description: Image Builder config
+    value: ${{ steps.vars.outputs.image_builder }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Py Libs
+      shell: bash
+      run: |
+        pip install pyyaml
+        pip install jsonschema
+
+    - name: Process Props
+      shell: bash
+      env:
+        SCHEMA_PATH: ${{ github.action_path}}/gradle.workflow.schema.json.yaml
+        OUTPUT_PATH: .devx.yaml.processed.sh
+        INPUT_PATH: ${{ inputs.devx-config }}
+      run: python ${{ github.action_path}}/process_props.py
+
+    - name: debugging
+      shell: bash
+      if: runner.debug == '1'
+      run: cat  .devx.yaml.processed.sh
+
+    - name: Source file
+      id: vars
+      shell: bash
+      run: |
+        image_builder=`yq eval '.image-builder.images' -p yaml -o json < ${{ inputs.devx-config }}`
+        if [[ $image_builder == "null" ]]; then
+          image_builder='[{"imageSuffix":""}]'
+        fi
+        image_builder=$(echo "$image_builder" | tr -d '\n ')
+        image_builder="{\"include\":${image_builder}}"
+        echo "image_builder=$image_builder" >> $GITHUB_OUTPUT
+        
+        chmod +x .devx.yaml.processed.sh
+        source .devx.yaml.processed.sh

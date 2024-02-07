@@ -1,0 +1,355 @@
+$schema: http://json-schema.org/draft-07/schema#
+type: object
+properties:
+  java:
+    type: object
+    properties:
+      version:
+        default: '17'
+        type: string
+      distribution:
+        description: https://github.com/actions/setup-java#supported-distributions
+        default: corretto
+        type: string
+        enum:
+          - temurin
+          - zulu
+          - adopt
+          - adopt-openj9
+          - liberica
+          - microsoft
+          - corretto
+          - semeru
+          - oracle
+          - dragonwell
+    required:
+      - version
+      - distribution
+  gradle:
+    type: object
+    properties:
+      publish-artifacts:
+        type: boolean
+        default: false
+        description: If publishing artifacts enabled. Used only on RELEASE pipeline.
+      build-root-directory:
+        type: string
+        default: "."
+      build-cmd:
+        type: string
+        description: Gradle command to execute project build with tests
+        default: "--no-daemon --continue build"
+      generate-job-summary:
+        type: boolean
+        default: true
+      publish-test-results:
+        type: boolean
+        default: true
+    required:
+      - build-cmd
+  image-builder:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: true
+      push-enabled:
+        type: boolean
+        description: Pushing images to Docker registry
+        default: true
+      build-with:
+        type: string
+        default: buildpacks
+        enum:
+          - buildpacks
+          - docker-file
+          - docker
+          - jib
+      buildpacks:
+        type: object
+        properties:
+          builder:
+            type: string
+            description: |
+              Paketo builder to build image https://paketo.io/docs/reference/builders-reference/
+            default: "paketobuildpacks/builder:base"
+      images:
+        type: array
+        description: |
+          List Of images which should be built.
+          Image build pattern:  {REGISTRY_URL}/{REPO_NAME}[/{IMAGE_SUFFIX}]:{TAG}
+        items:
+          oneOf:
+            - type: object
+              properties:
+                imageSuffix:
+                  type: string
+                  description: |
+                    Image suffix to use. Commonly used if one repo produces multiple images.
+                    For example:
+                      * code-srvice/client-test
+                      * code-srvice/performance-test
+                    Where client-test and performance-test are suffixes.
+                  default: ""
+                dockerfile:
+                  type: string
+                  default: Dockerfile
+                  description: Dockerfile path to build
+                build-args:
+                  description: Custom docker build arguments
+                  type: string
+                  default: ""
+                docker-build-context-folder:
+                  type: string
+                  default: "."
+              required:
+                - imageSuffix
+                - dockerfile
+                - build-args
+                - docker-build-context-folder
+              additionalProperties: false
+            - type: object
+              properties:
+                imageSuffix:
+                  type: string
+                  default: ""
+                  description: |
+                    Image suffix to use. Commonly used if one repo produces multiple images.
+                    For example:
+                      * code-srvice/client-test
+                      * code-srvice/performance-test
+                    Where client-test and performance-test are suffixes.
+                module:
+                  type: string
+                  default: ""
+                  description: Gradle module to pack.
+                builder:
+                  type: string
+                  description: |
+                    This Paketo builder property will override main image-build.buildpacks.builder property. 
+                    If property is absent/empty then it takes main image-build.buildpacks.builder property
+                  default: "paketobuildpacks/builder:base"
+                build-args:
+                  description: Custom buildpack arguments
+                  type: string
+                  default: ""
+              required:
+                - imageSuffix
+                - module
+              additionalProperties: false
+    required:
+      - enabled
+      - build-with
+    allOf:
+      - if:
+          properties:
+            build-with:
+              const: docker-file
+        then:
+          required:
+            - images
+          properties:
+            images:
+              minItems: 1
+              items:
+                required:
+                  - imageSuffix
+                  - dockerfile
+                  - build-args
+                  - docker-build-context-folder
+      - if:
+          properties:
+            build-with:
+              const: buildpacks
+        then:
+          required:
+            - images
+          properties:
+            images:
+              minItems: 1
+              items:
+                required:
+                  - imageSuffix
+                  - module
+              additionalProperties: false
+
+      - if:
+          properties:
+            build-with:
+              const: jib
+        then:
+          properties:
+            images:
+              maxItems: 0
+
+      - if:
+          properties:
+            build-with:
+              const: docker
+        then:
+          properties:
+            images:
+              maxItems: 0
+
+  checks:
+    type: object
+    properties:
+      conventional-commits:
+        type: object
+        description: |
+          Validate your commits. About conventional-commits pls check: https://www.conventionalcommits.org/en/v1.0.0/
+          Implementation based on commitlint: https://commitlint.js.org
+        properties:
+          enabled:
+            type: boolean
+            default: true
+        required:
+          - enabled
+      snyk:
+        type: object
+        description: |
+          https://docs.snyk.io/scan-applications/start-scanning/scan-open-source-libraries-and-licenses
+        properties:
+          enabled:
+            type: boolean
+            default: true
+          severity:
+            type: string
+            default: high
+            description: |
+              Report only vulnerabilities at the specified level or higher.
+            enum:
+              - low
+              - medium
+              - high
+              - critical
+        required:
+          - enabled
+      sonar:
+        type: object
+        description: |
+          Sonar configuration: https://www.sonarsource.com/products/sonarcloud/
+        properties:
+          enabled:
+            type: boolean
+            default: false
+          organization:
+            type: string
+          url:
+            type: string
+            default: 'https://sonarcloud.io'
+          run-quality-gate:
+            type: boolean
+            default: true
+          pr-decoration:
+            default: true
+            type: boolean
+        required:
+          - enabled
+          - organization
+      trivy:
+        type: object
+        description: |
+          Trivy security linter configuration. 
+          More: https://aquasecurity.github.io/trivy/v0.47/
+        properties:
+          enabled:
+            type: boolean
+            default: true
+          timeout:
+            type: string
+            pattern: ^[0-9]+m$
+            default: 10m
+            description: |
+              Your scan may time out. Java takes a particularly long time to scan.
+              Try increasing the value of the `timeout` option such as `timeout` 15m.
+          severity:
+            type: string
+            default: HIGH,CRITICAL
+            pattern: "^(UNKNOWN|LOW|MEDIUM|HIGH|CRITICAL)(,(UNKNOWN|LOW|MEDIUM|HIGH|CRITICAL))*$"
+            description: |
+              Severities of security issues to be displayed (UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL)
+          vulnerability-type:
+            type: string
+            pattern: ^(os|library)(,os|,library)*$
+            default: 'os,library'
+            description: |
+              comma-separated list of vulnerability types (os,library) (default [os,library])
+        required:
+          - enabled
+      csa:
+        type: object
+        description: |
+          Code Scanning Security Alerts.
+          Custom tool which publishing security issues from GitHub security tab to Pull Request.
+        properties:
+          enabled:
+            type: boolean
+            default: true
+          severity:
+            type: string
+            default: high,error
+          state:
+            type: string
+            default: 'open'
+            enum:
+              - 'open'
+              - 'closed'
+          skip-alerts:
+            type: boolean
+            default: false
+          job-name:
+            default: 'code-scanning-alerts'
+            type: string
+        required:
+          - enabled
+    required:
+      - csa
+      - trivy
+      - snyk
+      - conventional-commits
+  aws:
+    type: object
+    properties:
+      region:
+        type: string
+        default: 'us-east-1'
+        enum:
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
+          - af-south-1
+          - ap-east-1
+          - ap-south-1
+          - ap-northeast-3
+          - ap-northeast-2
+          - ap-southeast-1
+          - ap-southeast-2
+          - ap-northeast-1
+          - ca-central-1
+          - eu-central-1
+          - eu-west-1
+          - eu-west-2
+          - eu-south-1
+          - eu-west-3
+          - eu-north-1
+          - me-south-1
+          - sa-east-1
+    required:
+      - region
+
+dependencies:
+  checks:
+    trivy:
+      - image-builder
+  gradle:
+    - java
+
+
+required:
+  - image-builder
+  - gradle
+  - checks
+  - java
+  - aws
