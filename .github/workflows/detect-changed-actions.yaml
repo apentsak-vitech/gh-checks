@@ -28,8 +28,9 @@ jobs:
         shell: bash
         id: config
         env:
-          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+#          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh label create dependencies --description "Update dependencies" --color FBCA04 --force
           branch_name=`date '+%Y%m%d_%H%M%S'`_update
