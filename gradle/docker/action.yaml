@@ -83,7 +83,7 @@ runs:
     - name: Run docker build
       id: docker-build
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'docker-file' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-file@v0.0.1-docker-file
+      uses: apentsak-vitech/gh-checks/gradle/docker-file@v0.0.3-docker-file
       with:
         imageSuffix: ${{ inputs.imageSuffix }}
         registry-base-url: ${{ inputs.registry-base-url }}
@@ -97,7 +97,7 @@ runs:
     - name: Run JIB plugin
       id: docker-jib
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'jib' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-jib@v1.1.1
+      uses: apentsak-vitech/gh-checks/gradle/docker-jib@v0.0.3-docker-file
       with:
         build-root-directory: ${{ inputs.build-root-directory }}
         NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
