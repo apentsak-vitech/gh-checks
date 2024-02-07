@@ -31,9 +31,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh label create dependencies --description "Update dependencies" --color FBCA04 --force
+          echo 1
           branch_name=`date '+%Y%m%d_%H%M%S'`_update
+          echo 2
           pr_num=`git log --grep="Merge pull request #[0-9]\+" --pretty=oneline -1| sed -En "s/.*#([[:digit:]]+).*/\1/p"`
+          echo 3
           files=`gh pr diff $pr_num --name-only| grep -v '(.github|README|.git)'`
+          echo 4
           if [[ $? == "0" ]];then
             latest_tag=`git describe --tags --abbrev=0`
             git checkout -b "$branch_name" origin/main
