@@ -37,7 +37,7 @@ runs:
   using: 'composite'
   steps:
     - name: Gradle Build
-      uses: apentsak-vitech/gh-checks/gradle/build@v1.1.1
+      uses: apentsak-vitech/gh-checks/gradle/build@v0.0.3-docker-file
       with:
         build-cmd: --no-daemon --continue build -x check
         build-root-directory: ${{ inputs.build-root-directory }}
