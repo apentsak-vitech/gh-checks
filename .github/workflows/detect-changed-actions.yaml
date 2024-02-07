@@ -13,9 +13,6 @@ permissions:
   actions: write
   security-events: write
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
-
 jobs:
 
   detect-changed-action:
@@ -27,6 +24,8 @@ jobs:
       - name: ⇣ Search for changed actions
         shell: bash
         id: config
+        env:
+          GH_TOKEN: ${{secrets.GHUB_TOKEN}}
         run: |
           gh label create dependencies --description "Update dependencies" --color FBCA04 --force
           branch_name=`date '+%Y%m%d_%H%M%S'`_update
