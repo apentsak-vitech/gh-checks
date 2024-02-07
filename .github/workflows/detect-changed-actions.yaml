@@ -25,7 +25,7 @@ jobs:
         shell: bash
         id: config
         env:
-          GH_TOKEN: ${{secrets.GHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.GHUB_TOKEN}}
         run: |
           gh label create dependencies --description "Update dependencies" --color FBCA04 --force
           branch_name=`date '+%Y%m%d_%H%M%S'`_update
