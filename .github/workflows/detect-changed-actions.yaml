@@ -37,19 +37,18 @@ jobs:
           pr_num=`git log --grep="Merge pull request #[0-9]\+" --pretty=oneline -1| sed -En "s/.*#([[:digit:]]+).*/\1/p"`
           echo pr_num: $pr_num
           files=`gh pr diff $pr_num --name-only| grep -v '(.github|README|.git)'`
-          echo $?
-          echo $files
+          echo Files to update: $files
           if [[ $? == "0" ]];then
             latest_tag=`git describe --tags --abbrev=0`
             git checkout -B "$branch_name" origin/main
             for file in $files; do
               action_name=`dirname $file`
-              grep -rl "$action_name@" . || continue 
+              grep -rl "$action_name@" . || continue
               update_files=`grep -rl "$action_name@" . | grep -v '(.github|README|.git)'`
               echo $update_files | xargs sed -i "s|$action_name@.*|$action_name@$latest_tag|g"
               echo $update_files | xargs git add
-            done 
-            git commit -m "fix: update versions with $latest_tag"
-            git push origin -u "$branch_name"
-            gh pr create --title "Pull request title" --body "Pull request body" --base main --label "dependencies"
+            done
+            git commit -m "fix: update versions with $latest_tag" &&
+            git push origin -u "$branch_name" &&
+            gh pr create --title "Pull request title" --body "Pull request body" --base main --label "dependencies" || echo !!! No files were updated !!!
           fi
