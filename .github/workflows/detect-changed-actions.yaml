@@ -43,6 +43,6 @@ jobs:
               grep -rl "$action_name@" . | grep -v '(.github|README|.git)' | xargs git add
             done 
             git commit -m "fix: update versions with $latest_tag"
-            git push "origin/$branch_name"
+            git push origin -u "$branch_name"
             gh pr create --title "Pull request title" --body "Pull request body" --base main --label "dependencies"
           fi
