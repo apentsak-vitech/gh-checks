@@ -44,7 +44,7 @@ jobs:
             git checkout -B "$branch_name" origin/main
             for file in $files; do
               action_name=`dirname $file`
-              grep -rl "$action_name@" .
+              grep -rl "$action_name@" . || continue 
               update_files=`grep -rl "$action_name@" . | grep -v '(.github|README|.git)'`
               echo $update_files | xargs sed -i "s|$action_name@.*|$action_name@$latest_tag|g"
               echo $update_files | xargs git add
