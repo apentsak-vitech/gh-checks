@@ -28,10 +28,18 @@ jobs:
         shell: bash
         id: config
         run: |
+          gh label create dependencies --description "Update dependencies" --color FBCA04 --force
+          branch_name=`date '+%Y%m%d_%H%M%S'`_update
           pr_num=`git log --grep="Merge pull request #[0-9]\+" --pretty=oneline -1| sed -En "s/.*#([[:digit:]]+).*/\1/p"`
           files=`gh pr diff $pr_num --name-only| grep -v '(.github|README)'`
-          latest_tag=`git describe --tags --abbrev=0`
-          for file in $files; do
-            action_name=`dirname $file`
-            grep -rl "$action_name@' . | xargs sed -i "s|$action_name@.*|$action_name@$latest_tag|g"
-          done 
+          if [[ $? == "0" ]];then
+            latest_tag=`git describe --tags --abbrev=0`
+            git checkout -b "$branch_name" origin/main
+            for file in $files; do
+              action_name=`dirname $file`
+              grep -rl "$action_name@' . | xargs sed -i "s|$action_name@.*|$action_name@$latest_tag|g"
+            done 
+            git commit -m "fix: update versions with $latest_tag"
+            git push
+            gh pr create --title "Pull request title" --body "Pull request body" --base main --label "dependencies"
+          fi
