@@ -37,6 +37,7 @@ jobs:
           pr_num=`git log --grep="Merge pull request #[0-9]\+" --pretty=oneline -1| sed -En "s/.*#([[:digit:]]+).*/\1/p"`
           echo 3
           git branch
+          git log -3
           git log --grep="Merge pull request #[0-9]\+" --pretty=oneline -1
           git log --grep="Merge pull request #[0-9]\+" --pretty=oneline -1| sed -En "s/.*#([[:digit:]]+).*/\1/p"
           echo pr_num: $pr_num
