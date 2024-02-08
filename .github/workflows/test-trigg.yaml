@@ -14,12 +14,13 @@ permissions:
   security-events: write
 
 env:
-  PAT_TOKEN: ${{ secrets.GHUB_TOKEN }}
+  PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
 jobs:
   detect-changed-action:
     name: Detect Changed Actions
     runs-on: ubuntu-latest
+    environment: test
     steps:
       - uses: actions/checkout@v4
 #        with:
@@ -34,6 +35,11 @@ jobs:
             echo GH_TOKEN=true
           else
             echo GH_TOKEN=false
+          fi
+          if ! [[ -z "${{ secrets.PAT_TOKEN }}" ]]; then
+            echo secretsPAT_TOKEN=true
+          else
+            echo secretsPAT_TOKEN=false
           fi
           if ! [[ -z "${{ env.PAT_TOKEN }}" ]]; then
             echo PAT_TOKEN=true
