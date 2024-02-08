@@ -20,7 +20,7 @@ jobs:
   detect-changed-action:
     name: Detect Changed Actions
     runs-on: ubuntu-latest
-    environment: test
+#    environment: test
     steps:
       - uses: actions/checkout@v4
 #        with:
