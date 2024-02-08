@@ -39,7 +39,6 @@ jobs:
     needs: version-bump
     steps:
       - uses: actions/checkout@v4
-
       - name: ⇣ Search for changed actions
         shell: bash
         id: config
