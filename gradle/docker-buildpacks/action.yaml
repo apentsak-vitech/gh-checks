@@ -41,7 +41,7 @@ runs:
       uses: buildpacks/github-actions/setup-pack@v5.4.0
 
     - id: vars
-      uses: apentsak-vitech/gh-checks/utils/vars@v4.0.3
+      uses: apentsak-vitech/gh-checks/utils/vars@v4.1.0
       with:
         devx-config: ${{ inputs.devx-config }}
 
