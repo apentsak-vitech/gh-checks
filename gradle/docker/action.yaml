@@ -50,7 +50,7 @@ runs:
       with:
         image-tag: ${{ inputs.image-tag }}
 
-    - uses: apentsak-vitech/gh-checks/utils/vars@v4.3.0
+    - uses: apentsak-vitech/gh-checks/utils/vars@v4.3.4
       id: vars
       with:
         devx-config: ${{ inputs.devx-config }}
@@ -58,7 +58,7 @@ runs:
     - name: Run Paketo Buildpacks
       id: docker-buildpacks
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'buildpacks' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-buildpacks@v4.3.1
+      uses: apentsak-vitech/gh-checks/gradle/docker-buildpacks@v4.3.4
       with:
         imageSuffix: ${{ inputs.imageSuffix }}
         devx-config: ${{ inputs.devx-config }}

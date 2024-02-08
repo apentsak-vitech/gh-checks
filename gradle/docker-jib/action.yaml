@@ -22,7 +22,7 @@ runs:
   using: 'composite'
   steps:
     - name: Run `docker` plugin
-      uses: apentsak-vitech/gh-checks/gradle/build@v4.2.0
+      uses: apentsak-vitech/gh-checks/gradle/build@v4.3.4
       with:
         build-cmd: -Djib.console=plain --no-daemon jibDockerBuild
         build-root-directory: ${{ inputs.build-root-directory }}
