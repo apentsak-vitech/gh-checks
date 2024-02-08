@@ -30,6 +30,17 @@ jobs:
         env:
           GH_TOKEN: ${{ env.PAT_TOKEN }}
         run: |
+          if ! [[ -z "${{ env.GH_TOKEN }}" ]]; then
+            echo GH_TOKEN=true
+          else
+            echo GH_TOKEN=false
+          fi
+          if ! [[ -z "${{ env.PAT_TOKEN }}" ]]; then
+            echo PAT_TOKEN=true
+          else
+            echo PAT_TOKEN=false
+          fi
+          
           git fetch origin
           git checkout -B main origin/main
           git pull --unshallow
