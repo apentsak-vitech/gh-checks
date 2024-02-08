@@ -13,23 +13,20 @@ permissions:
   actions: write
   security-events: write
 
-env:
-  PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-
 jobs:
   detect-changed-action:
     name: Detect Changed Actions
     runs-on: ubuntu-latest
-#    environment: test
+    environment: test
     steps:
       - uses: actions/checkout@v4
-#        with:
-#          token: ${{ env.PAT_TOKEN }}
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
       - name: ⇣ Search for changed actions
         shell: bash
         id: config
         env:
-          GH_TOKEN: ${{ env.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           if ! [[ -z "${{ env.GH_TOKEN }}" ]]; then
             echo GH_TOKEN=true
@@ -40,11 +37,6 @@ jobs:
             echo secretsPAT_TOKEN=true
           else
             echo secretsPAT_TOKEN=false
-          fi
-          if ! [[ -z "${{ env.PAT_TOKEN }}" ]]; then
-            echo PAT_TOKEN=true
-          else
-            echo PAT_TOKEN=false
           fi
           
           git fetch origin
