@@ -40,7 +40,7 @@ runs:
       shell: bash
       id: config
       run: |
-        eval `yq eval '.image-builder.images' -p yaml -o json < ${{ inputs.devx-config }} | jq -r --arg job_name "${{ inputs.imageSuffix }}" 'map(select(.imageSuffix | contains($job_name))) | .[0]| @sh "imageSuffix=\(.imageSuffix) dockerfile=\(.dockerfile) build_args=\(."build-args") docker_build_context_folder=\(."docker-build-context-folder")"'`
+        eval `yq eval '.image-builder.images' -p yaml -o json < ${{ inputs.devx-config }} | jq -r --arg job_name "${{ inputs.imageSuffix }}" 'map(select(.imageSuffix | contains($job_name))) | .[0]|.@v4.1.3
         
         echo "imageSuffix=${imageSuffix}" >> $GITHUB_OUTPUT
         echo "dockerfile=${dockerfile}" >> $GITHUB_OUTPUT

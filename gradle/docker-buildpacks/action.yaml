@@ -38,10 +38,10 @@ runs:
   using: 'composite'
   steps:
     - name: ⚙️Setup Buildpacks
-      uses: buildpacks/github-actions/setup-pack@v5.4.0
+      uses: buildpacks/github-actions/setup-pac.@v4.1.3
 
     - id: vars
-      uses: apentsak-vitech/gh-checks/utils/vars@v4.1.0
+      uses: apentsak-vitech/gh-checks/utils/var.@v4.1.3
       with:
         devx-config: ${{ inputs.devx-config }}
 
@@ -49,7 +49,7 @@ runs:
       shell: bash
       id: config
       run: |
-        eval `yq eval '.image-builder.images' -p yaml -o json < ${{ inputs.devx-config }} | jq -r --arg job_name "${{ inputs.imageSuffix }}" 'map(select(.imageSuffix | contains($job_name))) | .[0]| @sh "imageSuffix=\(.imageSuffix) module=\(.module) build_args=\(."build-args") builder=\(.builder)"'`
+        eval `yq eval '.image-builder.images' -p yaml -o json < ${{ inputs.devx-config }} | jq -r --arg job_name "${{ inputs.imageSuffix }}" 'map(select(.imageSuffix | contains($job_name))) | .[0]|.@v4.1.3
 
         echo "imageSuffix=${imageSuffix}" >> $GITHUB_OUTPUT
         echo "module=${module}" >> $GITHUB_OUTPUT
