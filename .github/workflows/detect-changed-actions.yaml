@@ -51,16 +51,17 @@ jobs:
           git config --global user.email "devx_arcadia@arcadia.io"
           git config --global user.name "DevX Updater"
           latest_tag=${{ needs.version-bump.outputs.previousVersionTag }}
+          new_tag=${{ needs.version-bump.outputs.newVersionTag }}
           files=`git diff --name-only $latest_tag..HEAD --oneline`
           for file in $files; do
             action_name=`dirname $file`
             grep -rl "$action_name@" . | grep -v '.git' || continue
             update_files=`grep -rl "$action_name@" . | grep -v '.git'`
-            echo $update_files | xargs sed -i "s|$action_name@.*|$action_name@$latest_tag|g" || echo "No files were found"
+            echo $update_files | xargs sed -i "s|$action_name@.*|$action_name@$new_tag|g" || echo "No files were found"
             echo $update_files | xargs git add
           done
 
-          git commit -m "fix: update versions to $latest_tag" &&
+          git commit -m "fix: update versions to $new_tag" &&
           git push origin -u main || echo !!! No files were updated !!!
 
 
