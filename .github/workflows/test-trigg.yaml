@@ -39,13 +39,13 @@ jobs:
             echo secretsPAT_TOKEN=false
           fi
           
-          git fetch origin
-          git checkout -B main origin/main
-          git pull --unshallow
-          git config --global user.email "devx_arcadia@arcadia.io"
-          git config --global user.name "DevX Updater"
-          echo TEST > `date '+%N'`.txt
-          git add .
-          git commit -m "fix: TEST!!!" &&
-          git push origin -u main || echo !!! No files were updated !!!
+#          git fetch origin
+#          git checkout -B main origin/main
+#          git pull --unshallow
+#          git config --global user.email "devx_arcadia@arcadia.io"
+#          git config --global user.name "DevX Updater"
+#          echo TEST > `date '+%N'`.txt
+#          git add .
+#          git commit -m "fix: TEST!!!" &&
+#          git push origin -u main || echo !!! No files were updated !!!
           
