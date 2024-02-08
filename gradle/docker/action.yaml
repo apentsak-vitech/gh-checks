@@ -50,7 +50,7 @@ runs:
       with:
         image-tag: ${{ inputs.image-tag }}
 
-    - uses: apentsak-vitech/gh-checks/utils/vars@v3.0.2
+    - uses: apentsak-vitech/gh-checks/utils/vars@v4.0.0
       id: vars
       with:
         devx-config: ${{ inputs.devx-config }}
