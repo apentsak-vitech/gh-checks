@@ -31,13 +31,13 @@ jobs:
         run: |
           gh label create dependencies --description "Update dependencies" --color FBCA04 --force
           branch_name=`date '+%Y%m%d_%H%M%S'`_update
+          git checkout -b main origin/main
           git pull --unshallow
           git config --global user.email "devx_arcadia@arcadia.io"
           git config --global user.name "DevX Updater"
           pr_num=`git log --grep="Merge pull request #[0-9]\+" --pretty=oneline -1| sed -En "s/.*#([[:digit:]]+).*/\1/p"`
           echo pr_num: $pr_num
           files=`gh pr diff $pr_num --name-only| grep -v '(.github|README|.git)'`
-          echo Files to update: $files
           if [[ $? == "0" ]];then
             latest_tag=`git describe --tags --abbrev=0`
             git checkout -B "$branch_name" origin/main
