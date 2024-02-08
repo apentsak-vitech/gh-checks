@@ -54,9 +54,10 @@ jobs:
           files=`git diff --name-only $latest_tag..HEAD --oneline|sort|uniq`
           for file in $files; do
             action_name=`dirname $file`
+            if [[ $action_name == "." ]];then continue; fi
             grep -rl "$action_name@" . | grep -v '.git' || continue
             update_files=`grep -rl "$action_name@" . | grep -v '.git'`
-            echo $update_files | xargs sed -i 's|$action_name@.*|$action_name@$new_tag|g' || echo "No files were found"
+            echo $update_files | xargs sed -i "s|$action_name@.*|$action_name@$new_tag|g" || echo "No files were found"
             echo $update_files | xargs git add
           done
 

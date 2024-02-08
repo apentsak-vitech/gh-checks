@@ -45,12 +45,12 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - uses: apentsak-vitech/gh-checks/docker/ta.@v4.1.3
+    - uses: apentsak-vitech/gh-checks/docker/tag@v1.1.1
       id: image-tag
       with:
         image-tag: ${{ inputs.image-tag }}
 
-    - uses: apentsak-vitech/gh-checks/utils/var.@v4.1.3
+    - uses: apentsak-vitech/gh-checks/utils/vars@v4.1.0
       id: vars
       with:
         devx-config: ${{ inputs.devx-config }}
@@ -58,7 +58,7 @@ runs:
     - name: Run Paketo Buildpacks
       id: docker-buildpacks
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'buildpacks' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-buildpack.@v4.1.3
+      uses: apentsak-vitech/gh-checks/gradle/docker-buildpacks@v4.1.1
       with:
         imageSuffix: ${{ inputs.imageSuffix }}
         devx-config: ${{ inputs.devx-config }}
@@ -72,7 +72,7 @@ runs:
     - name: Run `docker` plugin
       id: docker-plugin
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'docker' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-plugi.@v4.1.3
+      uses: apentsak-vitech/gh-checks/gradle/docker-plugin@v1.1.2-docker-plugin
       with:
         build-root-directory: ${{ inputs.build-root-directory }}
         NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
@@ -83,7 +83,7 @@ runs:
     - name: Run docker build
       id: docker-build
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'docker-file' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-fil.@v4.1.3
+      uses: apentsak-vitech/gh-checks/gradle/docker-file@v0.0.3-docker-file
       with:
         imageSuffix: ${{ inputs.imageSuffix }}
         registry-base-url: ${{ inputs.registry-base-url }}
@@ -97,7 +97,7 @@ runs:
     - name: Run JIB plugin
       id: docker-jib
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'jib' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-ji.@v4.1.3
+      uses: apentsak-vitech/gh-checks/gradle/docker-jib@v0.0.3-docker-file
       with:
         build-root-directory: ${{ inputs.build-root-directory }}
         NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
