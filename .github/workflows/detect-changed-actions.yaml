@@ -49,7 +49,8 @@ jobs:
               echo $update_files | xargs sed -i "s|$action_name@.*|$action_name@$latest_tag|g"
               echo $update_files | xargs git add
             done
-            git commit -m "fix: update versions with $latest_tag" &&
+            pr_body="**Update github actions** to new version **$latest_tag**"
+            git commit -m "fix: update versions to $latest_tag" &&
             git push origin -u "$branch_name" &&
-            gh pr create --title "Pull request title" --body "Pull request body" --base main --label "dependencies" || echo !!! No files were updated !!!
+            gh pr create --title "Update apentsak-vitech/gh-checks actions to $latest_tag" --body "$pr_body" --base main --label "dependencies" || echo !!! No files were updated !!!
           fi
