@@ -32,6 +32,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
 
+
   detect-changed-action:
     name: Detect Changed Actions
     runs-on: ubuntu-latest
