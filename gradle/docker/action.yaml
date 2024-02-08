@@ -58,7 +58,7 @@ runs:
     - name: Run Paketo Buildpacks
       id: docker-buildpacks
       if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'buildpacks' }}
-      uses: apentsak-vitech/gh-checks/gradle/docker-buildpacks@v2.4.2-docker-buildpacks
+      uses: apentsak-vitech/gh-checks/gradle/docker-buildpacks@v3.0.3
       with:
         imageSuffix: ${{ inputs.imageSuffix }}
         devx-config: ${{ inputs.devx-config }}
