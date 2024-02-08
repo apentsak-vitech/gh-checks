@@ -37,7 +37,7 @@ runs:
   using: 'composite'
   steps:
     - name: Gradle Build
-      uses: apentsak-vitech/gh-checks/gradle/build@v0.0.3-docker-file
+      uses: apentsak-vitech/gh-checks/gradle/build@v4.2.0
       with:
         build-cmd: --no-daemon --continue build -x check
         build-root-directory: ${{ inputs.build-root-directory }}
@@ -48,7 +48,7 @@ runs:
 
     - id: images-build
       name: Find and build Docker images
-      uses: apentsak-vitech/gh-checks/docker/build_v2@v2.1.10-docker-build_v2
+      uses: apentsak-vitech/gh-checks/docker/build_v2@v4.2.0
       with:
         devx-config: ${{ inputs.devx-config }}
         image-tag: ${{ inputs.image-tag }}
