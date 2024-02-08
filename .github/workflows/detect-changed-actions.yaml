@@ -3,7 +3,7 @@ name: Detect Changed Action
 on:
   push:
     branches:
-      - main
+      - dev
 
 permissions:
   pull-requests: write

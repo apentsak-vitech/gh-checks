@@ -1,0 +1,39 @@
+name: Detect Changed Action
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+  contents: write
+  id-token: write
+  checks: write
+  actions: write
+  security-events: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+
+jobs:
+  detect-changed-action:
+    name: Detect Changed Actions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ⇣ Search for changed actions
+        shell: bash
+        id: config
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch origin
+          git checkout -B main origin/main
+          git pull --unshallow
+          git config --global user.email "devx_arcadia@arcadia.io"
+          git config --global user.name "DevX Updater"
+          echo TEST > `date '+%N'`.txt
+          git add .
+          git commit -m "fix: TEST!!!" &&
+          git push origin -u main || echo !!! No files were updated !!!
