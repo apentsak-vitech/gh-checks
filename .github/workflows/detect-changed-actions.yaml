@@ -64,10 +64,9 @@ jobs:
             echo $update_files | xargs git add
           done
 
-          { git commit -m "fix: update versions to $new_tag" &&
-          git push origin -u main && echo "release=true" >> $GITHUB_OUTPUT && echo "release=true" } ||
-          { echo "!!! No actions were updated !!!" && 
-          echo "release=false" >> $GITHUB_OUTPUT && echo "release=false" }
+          git commit -m "fix: update versions to $new_tag" && \
+          git push origin -u main && echo "release=true" >> $GITHUB_OUTPUT && echo "release=true" || \
+          ( echo "!!! No actions were updated !!!" && echo "release=false" >> $GITHUB_OUTPUT && echo "release=false" )
 
 
   create-release:
