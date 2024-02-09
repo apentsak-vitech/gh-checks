@@ -66,7 +66,7 @@ jobs:
 
           git commit -m "fix: update versions to $new_tag" &&
           git push origin -u main && echo "release=true" >> $GITHUB_OUTPUT ||
-          echo "!!! No files were updated !!!" && 
+          echo "!!! No actions were updated !!!" && 
           echo "release=false" >> $GITHUB_OUTPUT
 
 
@@ -79,16 +79,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo ${{ needs.detect-changed-action.outputs.release }}
+      - run: echo ${{ needs.detect-changed-action.outputs.createRelease }}
       - name: Bump Version and Push Tags
-        if: ${{ needs.detect-changed-action.outputs.release == 'true' }}
+        if: ${{ needs.detect-changed-action.outputs.createRelease == 'true' }}
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.PAT_TOKEN }}
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
-        if: ${{ needs.detect-changed-action.outputs.release == 'true' }}
+        if: ${{ needs.detect-changed-action.outputs.createRelease == 'true' }}
         with:
           tag: ${{ needs.version-bump.outputs.newVersionTag }}
           name: Release ${{ needs.version-bump.outputs.newVersionTag }}
