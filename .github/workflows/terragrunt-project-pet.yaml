@@ -1,7 +1,10 @@
 name: Terragrunt PET
 
-on: pull_request
-
+#on: pull_request
+on:
+  push:
+    branches:
+      - asdasdasdasd
 permissions:
   pull-requests: write
   contents: write
