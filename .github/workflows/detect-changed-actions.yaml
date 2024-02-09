@@ -79,7 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: echo ${{ needs.detect-changed-action.outputs.release }}
       - name: Bump Version and Push Tags
+        if: ${{ needs.detect-changed-action.outputs.release == 'true' }}
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
         with:
