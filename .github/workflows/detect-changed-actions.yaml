@@ -56,8 +56,8 @@ jobs:
           new_tag=${{ needs.version-bump.outputs.newVersionTag }}
           echo "git diff --name-only $latest_tag..HEAD"
           files=`git diff --name-only $latest_tag..HEAD --oneline|sort|uniq`
-          printf "Updated Files:\n$files\n"
-          echo "Files to update"
+          printf "[*] Updated Files:\n$files\n"
+          echo "[*] Files to update"
           for file in $files; do
             action_name=`dirname $file`
             if [[ $action_name == "." ]];then continue; fi
