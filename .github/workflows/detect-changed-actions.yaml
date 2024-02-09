@@ -23,11 +23,12 @@ jobs:
       changelog: ${{ steps.tag_version.outputs.changelog }}
     steps:
       - uses: actions/checkout@v4
-      - name: Bump Version and Push Tags
+      - name: Calculate Versions and Tags
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.PAT_TOKEN }}
+          dry_run: true
 
   detect-changed-action:
     name: Detect Changed Actions
@@ -78,6 +79,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Bump Version and Push Tags
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.PAT_TOKEN }}
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         if: ${{ needs.detect-changed-action.outputs.release == 'true' }}
