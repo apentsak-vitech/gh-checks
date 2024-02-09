@@ -1,0 +1,104 @@
+name: Build Docker images
+description: |
+
+inputs:
+  java-version:
+    description: java version to use
+    default: '8'
+  registry-base-url:
+    description: Container Registry URL
+    required: true
+  build-root-directory:
+    description: Root directory of the gradle build.
+    required: false
+    default: '.'
+
+  image-tag:
+    description: docker tag
+    required: false
+
+  NEXUS_USERNAME:
+    description: Nexus username
+    required: true
+  NEXUS_PASSWORD:
+    description: Nexus password
+    required: true
+  AWS_ACCESS_KEY_ID:
+    description: AWS Access key
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    description: AWS secret key
+    required: true
+
+  devx-config:
+    description: Images descriptor
+    default: .devx.yaml
+  imageSuffix:
+    description: Docker Image Suffix
+    required: true
+
+outputs:
+  images:
+    description: comma-separated list of images
+    value: ${{ join(steps.*.outputs.images) }}
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: apentsak-vitech/gh-checks/docker/tag@v1.1.1
+      id: image-tag
+      with:
+        image-tag: ${{ inputs.image-tag }}
+
+    - uses: apentsak-vitech/gh-checks/utils/vars@v4.7.4
+      id: vars
+      with:
+        devx-config: ${{ inputs.devx-config }}
+
+    - name: Run Paketo Buildpacks
+      id: docker-buildpacks
+      if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'buildpacks' }}
+      uses: apentsak-vitech/gh-checks/gradle/docker-buildpacks@v4.7.5
+      with:
+        imageSuffix: ${{ inputs.imageSuffix }}
+        devx-config: ${{ inputs.devx-config }}
+        image-tag: ${{ steps.image-tag.outputs.tag }}
+        registry-base-url: ${{ inputs.registry-base-url }}
+        java-version: ${{ inputs.java-version }}
+        root-directory: ${{ inputs.build-root-directory }}
+        NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
+
+    - name: Run `docker` plugin
+      id: docker-plugin
+      if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'docker' }}
+      uses: apentsak-vitech/gh-checks/gradle/docker-plugin@v1.1.2-docker-plugin
+      with:
+        build-root-directory: ${{ inputs.build-root-directory }}
+        NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Run docker build
+      id: docker-build
+      if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'docker-file' }}
+      uses: apentsak-vitech/gh-checks/gradle/docker-file@v4.7.3
+      with:
+        imageSuffix: ${{ inputs.imageSuffix }}
+        registry-base-url: ${{ inputs.registry-base-url }}
+        devx-config: ${{ inputs.devx-config }}
+        image-tag: ${{ steps.image-tag.outputs.tag }}
+        NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Run JIB plugin
+      id: docker-jib
+      if: ${{ env.IMAGE_BUILDER_BUILD_WITH == 'jib' }}
+      uses: apentsak-vitech/gh-checks/gradle/docker-jib@v5.0.0
+      with:
+        build-root-directory: ${{ inputs.build-root-directory }}
+        NEXUS_USERNAME: ${{ inputs.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ inputs.NEXUS_PASSWORD }}

@@ -1,0 +1,86 @@
+name: 'Docker Build'
+description: 'Build provided dockerfiles'
+inputs:
+
+  devx-config:
+    description: Images descriptor
+    default: .devx.yaml
+  image-tag:
+    description: Docker image version
+    required: true
+  imageSuffix:
+    description: Docker Image Suffix
+    required: true
+  registry-base-url:
+    description: Docker registry base URL
+    required: true
+
+  NEXUS_USERNAME:
+    description: Nexus username
+    required: true
+  NEXUS_PASSWORD:
+    description: Nexus password
+    required: true
+  AWS_ACCESS_KEY_ID:
+    description: AWS Access key
+    required: false
+  AWS_SECRET_ACCESS_KEY:
+    description: AWS secret key
+    required: false
+
+outputs:
+  images:
+    description: comma-separated list of images
+    value: ${{ steps.images-build.outputs.images }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: ⇣ Get Dockerfile configs
+      shell: bash
+      id: config
+      run: |
+        eval `yq eval '.image-builder.images' -p yaml -o json < ${{ inputs.devx-config }} | jq -r --arg job_name "${{ inputs.imageSuffix }}" 'map(select(.imageSuffix | contains($job_name))) | .[0]| @sh "imageSuffix=\(.imageSuffix) dockerfile=\(.dockerfile) build_args=\(."build-args") docker_build_context_folder=\(."docker-build-context-folder")"'`
+        
+        echo "imageSuffix=${imageSuffix}" >> $GITHUB_OUTPUT
+        echo "dockerfile=${dockerfile}" >> $GITHUB_OUTPUT
+        echo "build_args=${build_args}" >> $GITHUB_OUTPUT
+        echo "docker_build_context_folder=${docker_build_context_folder}" >> $GITHUB_OUTPUT
+        echo $GITHUB_OUTPUT
+
+    - name: Build Images
+      id: images-build
+      shell: bash
+      env:
+        DEVX_CONFIG: ${{ inputs.devx-config }}
+        TAG: ${{ inputs.image-tag }}
+        REPO_NAME: ${{ github.event.repository.name }}
+        REGISTRY_BASE_URL: ${{ inputs.registry-base-url }}
+      run: |
+        set -x
+        
+        result=()
+
+        imageSuffix="${{ steps.config.outputs.imageSuffix }}"
+        if [[ "$imageSuffix" != "" ]]; then
+            imageSuffix="/$imageSuffix"
+          else
+            imageSuffix=""
+        fi
+        
+        export IMAGE="$REGISTRY_BASE_URL/$REPO_NAME$imageSuffix:$TAG"
+        
+        echo "::group::📦 Building $IMAGE"
+        dockerfile="${{ steps.config.outputs.dockerfile }}"
+        buildArgs="${{ steps.config.outputs.build_args }}"
+        dockerBuildContextFolder="${{ steps.config.outputs.docker_build_context_folder }}"
+        docker build $(echo "$buildArgs") -t "$IMAGE" -f "$dockerfile" "$dockerBuildContextFolder"
+        result+=("$IMAGE")
+        echo "::endgroup::"
+        
+        echo "images=$(IFS=,; echo "${result[*]}")" >> $GITHUB_OUTPUT
+
+
+
+
+

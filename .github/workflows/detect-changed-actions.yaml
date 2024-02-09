@@ -1,0 +1,100 @@
+name: Detect Changed Action
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  pull-requests: write
+  contents: write
+  id-token: write
+  checks: write
+  actions: write
+  security-events: write
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    environment: test
+    outputs:
+      previousVersionTag: ${{ steps.tag_version.outputs.previous_tag }}
+      newVersionTag: ${{ steps.tag_version.outputs.new_tag }}
+      changelog: ${{ steps.tag_version.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Calculate Versions and Tags
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.PAT_TOKEN }}
+          dry_run: true
+
+  detect-changed-action:
+    name: Detect Changed Actions
+    runs-on: ubuntu-latest
+    needs: version-bump
+    environment: test
+    outputs:
+      createRelease:  ${{ steps.detect.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+      - name: ⇣ Search for changed actions
+        shell: bash
+        id: detect
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          git fetch origin
+          git checkout -B main origin/main
+          git pull --unshallow
+          git config --global user.email "devx_arcadia@arcadia.io"
+          git config --global user.name "DevX Updater"
+          latest_tag=${{ needs.version-bump.outputs.previousVersionTag }}
+          new_tag=${{ needs.version-bump.outputs.newVersionTag }}
+          echo "git diff --name-only $latest_tag..HEAD"
+          files=`git diff --name-only $latest_tag..HEAD --oneline|sort|uniq`
+          printf "[*] Updated Files:\n$files\n"
+          echo "[*] Files to update"
+          for file in $files; do
+            action_name=`dirname $file`
+            if [[ $action_name == "." ]];then continue; fi
+            grep -rl "$action_name@" . | grep -v '.git' || continue
+            update_files=`grep -rl "$action_name@" . | grep -v '.git'`
+            echo $update_files | xargs sed -i "s|$action_name@.*|$action_name@$new_tag|g" || echo "No files were found"
+            echo $update_files | xargs git add
+          done
+
+          git commit -m "fix: update versions to $new_tag" && \
+          git push origin -u main && echo "release=true" >> $GITHUB_OUTPUT && echo "release=true" || \
+          ( echo "!!! No actions were updated !!!" && echo "release=false" >> $GITHUB_OUTPUT && echo "release=false" )
+
+
+  create-release:
+    name: Create GH Release
+    environment: test
+    needs:
+      - detect-changed-action
+      - version-bump
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bump Version and Push Tags
+        if: ${{ needs.detect-changed-action.outputs.createRelease == 'true' }}
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.PAT_TOKEN }}
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        if: ${{ needs.detect-changed-action.outputs.createRelease == 'true' }}
+        with:
+          tag: ${{ needs.version-bump.outputs.newVersionTag }}
+          name: Release ${{ needs.version-bump.outputs.newVersionTag }}
+          body: ${{ needs.version-bump.outputs.changelog }}

@@ -1,0 +1,23 @@
+name: Find Images
+description: |
+
+inputs:
+  keyword:
+    description: Keyword to find the images
+
+outputs:
+  images:
+    description: comma-separated list of images
+    value: ${{ steps.collect-images.outputs.images }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: collect-images
+      shell: bash
+      run: |
+        set -x
+        
+        IMAGES=$(docker image ls --format "{{.Repository}}:{{.Tag}}" | grep "${{ inputs.keyword }}" | cat | tr '\n' ',' | sed 's/,$//')
+        echo $IMAGES
+        echo "images=$IMAGES" >> $GITHUB_OUTPUT

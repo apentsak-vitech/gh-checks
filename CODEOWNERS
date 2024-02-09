@@ -1,0 +1,7 @@
+# About CODEOWNERS file:
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#example-of-a-codeowners-file
+
+# This file holds Code Owners for the main branch.
+# Mentioned members or teams will be automatically added as reviewers for PR to the target branch
+
+* @apentsak-vitech
