@@ -34,8 +34,6 @@ outputs:
     description: comma-separated list of images
     value: ${{ steps.build-images.outputs.images }}
 
-
-
 runs:
   using: 'composite'
   steps:
