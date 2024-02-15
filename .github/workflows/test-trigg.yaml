@@ -13,10 +13,6 @@ permissions:
   actions: write
   security-events: write
 
-branding:
-  icon: 'award'
-  color: 'green'
-
 jobs:
   detect-changed-action:
 
@@ -24,10 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: test
     steps:
-      - name: ⇣ Search for changed actions
-        shell: bash
-        run: |
-          echo NAX
+      - id: vars
+        uses: apentsak-vitech/gh-checks/github/br@vdev
+
           
 #          git fetch origin
 #          git checkout -B main origin/main

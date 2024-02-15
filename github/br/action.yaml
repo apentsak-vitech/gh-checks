@@ -1,0 +1,13 @@
+name: Checks Action
+description: |
+
+branding:
+  icon: 'award'
+  color: 'green'
+
+
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: echo NAX
