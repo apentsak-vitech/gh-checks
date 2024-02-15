@@ -2,8 +2,8 @@ name: Checks Action
 description: |
 
 branding:
-  icon: 'award'
-  color: 'green'
+  icon: 'battery-charging'
+  color: 'purple'
 
 
 runs:
